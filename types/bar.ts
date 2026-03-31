@@ -14,7 +14,6 @@ export interface BarSpot {
   noCoverCharge: boolean;
   openUntil: string;
   note: string;
-  // Map mock uses relative coordinates (0-100)
-  mapX: number;
-  mapY: number;
+  latitude: number;
+  longitude: number;
 }

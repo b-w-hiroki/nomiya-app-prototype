@@ -5,3 +5,22 @@
 body {
   @apply bg-gray-50 text-gray-900;
 }
+
+/* Leaflet: デフォルトアイコン枠を消し、ヘッダより手前にしない */
+.bar-map-pin {
+  background: transparent !important;
+  border: none !important;
+}
+
+.bar-leaflet-map.leaflet-container {
+  font-family: inherit;
+}
+
+.bar-leaflet-map .leaflet-control-attribution {
+  margin: 0;
+  padding: 2px 8px;
+  font-size: 10px;
+  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 6px 0 0 0;
+}

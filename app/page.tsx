@@ -65,24 +65,29 @@ function CampaignList() {
 
 export default function Home() {
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          近くのお得なキャンペーンを探す
-        </h2>
-        <p className="text-sm text-gray-600 mb-4">
-          駅と範囲を選んで、終了間近のお得情報をチェック！
+    <div className="mx-auto max-w-2xl px-4 py-6 pb-12">
+      <header className="mb-8 overflow-hidden rounded-2xl border border-gray-200/80 bg-gradient-to-br from-white via-orange-50/40 to-white px-5 py-6 shadow-sm ring-1 ring-black/[0.03]">
+        <p className="text-xs font-semibold uppercase tracking-wider text-accent">
+          キャンペーン
         </p>
-        <Suspense fallback={<div className="h-12" />}>
-          <SearchBar />
-        </Suspense>
-      </div>
+        <h2 className="mt-1 text-2xl font-bold tracking-tight text-gray-900">
+          近くのお得情報を探す
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-gray-600">
+          駅・範囲・並び順を選んで、終了が近い順などでチェックできます。
+        </p>
+        <div className="mt-5">
+          <Suspense fallback={<div className="h-12" />}>
+            <SearchBar />
+          </Suspense>
+        </div>
+      </header>
 
       <Suspense fallback={<p className="text-sm text-gray-500">読み込み中...</p>}>
         <CampaignList />
       </Suspense>
 
-      <div className="mt-8 text-center text-sm text-gray-500">
+      <div className="mt-10 text-center text-xs text-gray-500">
         <p>※ 情報の正確性は各店舗にご確認ください</p>
       </div>
     </div>

@@ -28,12 +28,16 @@ export default function SearchBar() {
     []
   );
 
+  const input =
+    "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 shadow-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/25";
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       <select
         value={stationId}
         onChange={(e) => update({ stationId: e.target.value })}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
+        className={input}
+        aria-label="駅"
       >
         {STATIONS.map((s) => (
           <option key={s.id} value={s.id}>
@@ -45,7 +49,8 @@ export default function SearchBar() {
       <select
         value={radius}
         onChange={(e) => update({ radius: e.target.value })}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
+        className={input}
+        aria-label="範囲"
       >
         {radiusOptions.map((r) => (
           <option key={r.value} value={r.value}>
@@ -57,7 +62,8 @@ export default function SearchBar() {
       <select
         value={sort}
         onChange={(e) => update({ sort: e.target.value })}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
+        className={input}
+        aria-label="並び順"
       >
         <option value="endsSoon">終了間近</option>
         <option value="distance">近い順</option>

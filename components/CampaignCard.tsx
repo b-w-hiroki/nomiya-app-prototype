@@ -13,7 +13,7 @@ export default function CampaignCard({ campaign }: { campaign: CampaignWithDista
   const km = (campaign.distanceMeters / 1000).toFixed(1);
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+    <div className="overflow-hidden rounded-xl border border-gray-200/90 bg-white shadow-sm ring-1 ring-black/[0.02] transition-shadow hover:shadow-md">
       <div className="relative w-full h-48 bg-gray-200">
         {!imageError && campaign.image_url ? (
           <Image

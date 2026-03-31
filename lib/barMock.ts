@@ -1,5 +1,6 @@
 import { BarSpot } from "@/types/bar";
 
+/** 横浜駅周辺を想定したモック座標 */
 export const BAR_SPOTS: BarSpot[] = [
   {
     id: "b1",
@@ -14,8 +15,8 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: false,
     openUntil: "02:00",
     note: "カウンター中心で初来店が多い。会話もほどよい。",
-    mapX: 42,
-    mapY: 30,
+    latitude: 35.4672,
+    longitude: 139.6175,
   },
   {
     id: "b2",
@@ -30,8 +31,8 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: true,
     openUntil: "01:00",
     note: "静かに飲みたい方向け。ウイスキーが豊富。",
-    mapX: 64,
-    mapY: 40,
+    latitude: 35.4648,
+    longitude: 139.628,
   },
   {
     id: "b3",
@@ -46,8 +47,8 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: true,
     openUntil: "03:00",
     note: "立ち寄りやすい雰囲気。にぎやかめ。",
-    mapX: 34,
-    mapY: 52,
+    latitude: 35.4645,
+    longitude: 139.619,
   },
   {
     id: "b4",
@@ -62,8 +63,8 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: true,
     openUntil: "24:00",
     note: "1人客比率が高く、スタッフが丁寧。",
-    mapX: 24,
-    mapY: 78,
+    latitude: 35.4505,
+    longitude: 139.6295,
   },
   {
     id: "b5",
@@ -78,7 +79,7 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: false,
     openUntil: "01:30",
     note: "落ち着いた接客。デート利用も多い。",
-    mapX: 56,
-    mapY: 82,
+    latitude: 35.4428,
+    longitude: 139.637,
   },
 ];

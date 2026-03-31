@@ -1,7 +1,16 @@
 /** @type {import('next').NextConfig} */
+const isStaticExport = process.env.STATIC_EXPORT === "true";
+const basePath =
+  process.env.BASE_PATH && process.env.BASE_PATH.trim() !== ""
+    ? process.env.BASE_PATH.trim()
+    : undefined;
+
 const nextConfig = {
   // 開発環境の最適化
   reactStrictMode: true,
+
+  ...(isStaticExport ? { output: "export", trailingSlash: true } : {}),
+  ...(basePath ? { basePath } : {}),
   
   // 開発時のパフォーマンス最適化
   swcMinify: true,
@@ -21,8 +30,9 @@ const nextConfig = {
         hostname: 'images.unsplash.com',
       },
     ],
-    // 開発時の画像最適化を無効化（高速化）
-    unoptimized: process.env.NODE_ENV === 'development',
+    // 静的 export 時は必須。開発時はビルド高速化のため無効化
+    unoptimized:
+      isStaticExport || process.env.NODE_ENV === "development",
   },
   
   // 開発時のコンパイル最適化

@@ -5,6 +5,7 @@ import CampaignCard from "@/components/CampaignCard";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { CampaignWithDistance } from "@/types/campaign";
+import { getCampaigns } from "@/lib/campaignsQuery";
 
 function CampaignList() {
   const params = useSearchParams();
@@ -22,11 +23,16 @@ function CampaignList() {
       setLoading(true);
       setError(null);
       try {
-        const url = `/api/campaigns?stationId=${stationId}&radius=${radius}&sort=${sort}`;
-        const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        setItems(json.campaigns ?? []);
+        const result = await getCampaigns({
+          stationId,
+          radius,
+          sort,
+        });
+        if (controller.signal.aborted) return;
+        if (!result.ok) {
+          throw new Error(result.error ?? "読み込みに失敗しました");
+        }
+        setItems(result.data.campaigns ?? []);
       } catch (e) {
         if (e instanceof Error && e.name !== "AbortError") {
           setError(e.message ?? "読み込みに失敗しました");

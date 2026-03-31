@@ -84,7 +84,10 @@ export default function BarModePage() {
               Barモード
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-600">
-              大きな地図で位置を確認し、ピンまたは店名チップを押すと<strong className="font-semibold text-gray-800">右のパネルに詳細</strong>が出ます。
+              地図左上で<strong className="font-semibold text-gray-800">シンプル／詳細</strong>
+              を切り替えられます。オレンジの点線サークルは
+              <strong className="font-semibold text-gray-800">おすすめエリア</strong>
+              （モック）です。ピンや店名チップで右のパネルに詳細が出ます。
             </p>
           </div>
         </div>

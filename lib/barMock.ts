@@ -18,6 +18,7 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: false,
     openUntil: "02:00",
     note: "カウンター中心で初来店が多い。会話もほどよい。",
+    stockDrinks: ["sapporo", "highball", "sour"],
     coverImageUrl: u("photo-1514933651103-005eec06c04b"),
     atmospherePhotos: [
       u("photo-1572116469696-31de0f17cc34", 640, 420),
@@ -39,6 +40,7 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: true,
     openUntil: "01:00",
     note: "静かに飲みたい方向け。ウイスキーが豊富。",
+    stockDrinks: ["whiskey", "wine", "cocktail"],
     coverImageUrl: u("photo-1470337458703-46ad1756a187"),
     atmospherePhotos: [u("photo-1525268771113-32d9e9141fcd", 640, 420)],
     latitude: 35.4648,
@@ -57,6 +59,7 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: true,
     openUntil: "03:00",
     note: "立ち寄りやすい雰囲気。にぎやかめ。",
+    stockDrinks: ["asahi", "sapporo", "sour", "highball"],
     coverImageUrl: u("photo-1558642452-9d2a7deb7f62"),
     atmospherePhotos: [
       u("photo-1514362540857-3e02c0fb4c36", 640, 420),
@@ -78,6 +81,7 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: true,
     openUntil: "24:00",
     note: "1人客比率が高く、スタッフが丁寧。",
+    stockDrinks: ["kirin", "craft", "highball"],
     coverImageUrl: u("photo-1517248135467-4c7edcad34c4"),
     atmospherePhotos: [u("photo-1559329007-40df8a9345d8", 640, 420)],
     latitude: 35.4505,
@@ -96,6 +100,7 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: false,
     openUntil: "01:30",
     note: "落ち着いた接客。デート利用も多い。",
+    stockDrinks: ["yebisu", "wine", "cocktail", "whiskey"],
     coverImageUrl: u("photo-1566417713940-fe7c737a9ef2"),
     atmospherePhotos: [
       u("photo-1507003211169-0a1dd7228f2d", 640, 420),

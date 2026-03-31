@@ -18,6 +18,8 @@ export interface BarSpot {
   coverImageUrl: string;
   /** 追加の雰囲気ショット（任意） */
   atmospherePhotos?: string[];
+  /** 取り扱い例（`lib/barDrinks` の value と対応。逆引きフィルタ用） */
+  stockDrinks: string[];
   latitude: number;
   longitude: number;
 }

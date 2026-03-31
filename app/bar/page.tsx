@@ -4,13 +4,19 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import BarCard from "@/components/BarCard";
 import { BAR_SPOTS } from "@/lib/barMock";
+import { DRINK_FILTER_OPTIONS } from "@/lib/barDrinks";
 import { BarPriceRange, BarVibe } from "@/types/bar";
-import { MapPin, SlidersHorizontal, Wine } from "lucide-react";
+import { Beer, MapPin, SlidersHorizontal, Wine } from "lucide-react";
+
+const MAP_WRAP_CLASS =
+  "h-[260px] w-full shrink-0 sm:h-[288px] lg:h-[308px] xl:h-[320px]";
 
 const BarMap = dynamic(() => import("@/components/BarMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[min(54vh,560px)] min-h-[300px] items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-500">
+    <div
+      className={`flex items-center justify-center rounded-2xl border border-gray-200 bg-stone-50 text-sm text-gray-500 ${MAP_WRAP_CLASS}`}
+    >
       地図を読み込み中…
     </div>
   ),
@@ -25,6 +31,7 @@ export default function BarModePage() {
   const [price, setPrice] = useState<BarPriceRange | "all">("all");
   const [vibe, setVibe] = useState<BarVibe | "all">("all");
   const [beginner, setBeginner] = useState<Filter>("all");
+  const [drinkKey, setDrinkKey] = useState<string>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
@@ -35,9 +42,11 @@ export default function BarModePage() {
         beginner === "all" ||
         (beginner === "yes" && bar.beginnerFriendly) ||
         (beginner === "no" && !bar.beginnerFriendly);
-      return byPrice && byVibe && byBeginner;
+      const byDrink =
+        drinkKey === "all" || bar.stockDrinks.includes(drinkKey);
+      return byPrice && byVibe && byBeginner && byDrink;
     });
-  }, [price, vibe, beginner]);
+  }, [price, vibe, beginner, drinkKey]);
 
   useEffect(() => {
     if (selectedId && !filtered.some((b) => b.id === selectedId)) {
@@ -52,6 +61,8 @@ export default function BarModePage() {
     const rest = filtered.filter((v) => v.id !== selectedId);
     return [selected, ...rest];
   }, [filtered, selectedId]);
+
+  const drinkHint = DRINK_FILTER_OPTIONS.find((o) => o.value === drinkKey);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 pb-12">
@@ -68,7 +79,7 @@ export default function BarModePage() {
               Barモード
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-600">
-              どこにBarがあるか・どんな雰囲気かを、地図と条件絞り込みでざっくり把握するためのプロトタイプです。
+              地図で位置をつかみつつ、雰囲気・飲みたいものから店を絞り込めます（データはモックです）。
             </p>
           </div>
         </div>
@@ -77,7 +88,7 @@ export default function BarModePage() {
       <section className="mb-6 rounded-2xl border border-gray-200/90 bg-white p-4 shadow-sm sm:p-5">
         <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-900">
           <SlidersHorizontal className="h-4 w-4 text-accent" aria-hidden />
-          条件
+          基本条件
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           <select
@@ -115,19 +126,52 @@ export default function BarModePage() {
             <option value="no">初心者向け · いいえ</option>
           </select>
         </div>
+
+        <div className="mt-5 rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50/80 to-orange-50/40 p-4">
+          <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-900">
+            <Beer className="h-4 w-4 text-amber-700" aria-hidden />
+            飲みたいもの（逆引き）
+          </div>
+          <select
+            value={drinkKey}
+            onChange={(e) => setDrinkKey(e.target.value)}
+            className={selectClass}
+            aria-label="飲みたいもの"
+          >
+            <option value="all">指定なし（すべて表示）</option>
+            {DRINK_FILTER_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <p className="mt-2 text-xs leading-relaxed text-gray-600">
+            {drinkKey === "all" ? (
+              <>
+                例：「サッポロビール」を選ぶと、その取扱がある店だけが地図・一覧に残ります。置いていない店は出てきません（実データではメニューと要照合）。
+              </>
+            ) : (
+              <>
+                選択中：{drinkHint?.label}
+                {drinkHint?.description ? ` — ${drinkHint.description}` : ""}
+              </>
+            )}
+          </p>
+        </div>
       </section>
 
-      <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-        <div className="lg:sticky lg:top-[5.25rem] lg:z-0">
+      <div className="grid gap-6 lg:grid-cols-[minmax(280px,34%)_1fr] lg:items-start lg:gap-8">
+        <div className={`${MAP_WRAP_CLASS} lg:sticky lg:top-[5.25rem]`}>
           <BarMap
             bars={filtered}
             selectedId={selectedId}
             onSelect={setSelectedId}
+            className="h-full w-full"
           />
         </div>
 
-        <section className="space-y-3">
-          <div className="flex items-center justify-between gap-2">
+        <section className="flex min-h-0 flex-col gap-3 lg:max-h-[min(100vh-9.5rem,840px)] lg:overflow-y-auto lg:pr-1 [scrollbar-gutter:stable]">
+          <div className="sticky top-0 z-10 flex items-center justify-between gap-2 bg-gray-50/95 pb-2 pt-0 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none">
             <p className="flex items-center gap-2 text-sm font-medium text-gray-800">
               <MapPin className="h-4 w-4 text-accent" aria-hidden />
               一覧
@@ -138,15 +182,16 @@ export default function BarModePage() {
           </div>
           {sorted.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50/80 px-5 py-10 text-center text-sm text-gray-500">
-              条件に一致するBarがありません。フィルタを緩めて試してください。
+              条件に一致するBarがありません。フィルタや「飲みたいもの」を緩めて試してください。
             </div>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-4 pb-2">
               {sorted.map((bar) => (
-                <li key={bar.id}>
+                <li key={bar.id} className="max-w-xl lg:max-w-none">
                   <BarCard
                     bar={bar}
                     selected={selectedId === bar.id}
+                    highlightDrink={drinkKey === "all" ? null : drinkKey}
                     onSelect={() =>
                       setSelectedId((id) => (id === bar.id ? null : bar.id))
                     }

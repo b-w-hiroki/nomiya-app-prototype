@@ -1,6 +1,7 @@
 "use client";
 
 import { BarSpot } from "@/types/bar";
+import { drinkLabel } from "@/lib/barDrinks";
 import { Clock, MapPin, Train } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -21,10 +22,13 @@ export default function BarCard({
   bar,
   selected,
   onSelect,
+  highlightDrink,
 }: {
   bar: BarSpot;
   selected?: boolean;
   onSelect?: () => void;
+  /** 逆引きフィルタで選んだドリンクをチップで強調 */
+  highlightDrink?: string | null;
 }) {
   const photos = useMemo(
     () => [bar.coverImageUrl, ...(bar.atmospherePhotos ?? [])],
@@ -57,7 +61,7 @@ export default function BarCard({
           : "border-gray-200/90 hover:border-gray-300 hover:shadow-md"
       } ${onSelect ? "cursor-pointer" : ""}`}
     >
-      <div className="relative aspect-[16/10] w-full bg-gray-100">
+      <div className="relative aspect-[16/9] w-full bg-gray-100">
         {!imageError && activeSrc ? (
           <Image
             src={activeSrc}
@@ -129,6 +133,26 @@ export default function BarCard({
         </div>
 
         <p className="mt-3 text-sm leading-relaxed text-gray-700">{bar.note}</p>
+
+        <div className="mt-3">
+          <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-gray-500">
+            飲み物の例
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {bar.stockDrinks.map((key) => (
+              <span
+                key={key}
+                className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${
+                  highlightDrink === key
+                    ? "bg-orange-100 text-orange-950 ring-2 ring-accent/70"
+                    : "bg-amber-50/90 text-amber-950/85 ring-1 ring-amber-100/90"
+                }`}
+              >
+                {drinkLabel(key)}
+              </span>
+            ))}
+          </div>
+        </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
           <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">

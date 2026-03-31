@@ -106,7 +106,7 @@ export default function BarModePage() {
               か<strong className="font-semibold text-gray-800">一覧</strong>
               で見る方式を切り替えられます。地図上の色付きゾーンは
               <strong className="font-semibold text-gray-800">おすすめエリア</strong>
-              の目安（多角形・モック）です。
+              の目安（うっすら塗り・枠なし／モック）です。
             </p>
           </div>
         </div>

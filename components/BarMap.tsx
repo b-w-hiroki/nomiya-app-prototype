@@ -112,7 +112,6 @@ function RecommendedAreaLayer({ zones }: { zones: RecommendedZone[] }) {
   return (
     <LayerGroup>
       {zones.map((z) => {
-        const stroke = z.accentHex ?? "#ea580c";
         const fillSoft = z.accentHex ?? "#fb923c";
         const positions = z.polygon.map(([la, lo]) => [la, lo] as [number, number]);
         return (
@@ -122,20 +121,8 @@ function RecommendedAreaLayer({ zones }: { zones: RecommendedZone[] }) {
               pathOptions={{
                 stroke: false,
                 fillColor: fillSoft,
-                fillOpacity: 0.06,
-                interactive: false,
-              }}
-            />
-            <Polygon
-              positions={positions}
-              pathOptions={{
-                color: stroke,
-                fillColor: fillSoft,
-                fillOpacity: 0.1,
-                weight: 2,
-                lineJoin: "round",
-                lineCap: "round",
-                className: "recommended-zone-pulse",
+                fillOpacity: 0.09,
+                className: "recommended-zone-fill",
               }}
             >
               <Tooltip direction="top" offset={[0, -4]} opacity={0.95}>
@@ -190,7 +177,7 @@ export default function BarMap({
             {mapStyle === "simple"
               ? "見やすいライト地図"
               : "道路・施設名が詳しい地図"}
-            {" · "}色付きの形＝おすすめエリア（目安）
+            {" · "}色の塗り＝おすすめエリア（目安・枠なし）
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

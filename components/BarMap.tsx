@@ -5,7 +5,7 @@ import {
   MapContainer,
   TileLayer,
   Marker,
-  Circle,
+  Polygon,
   LayerGroup,
   Tooltip,
   useMap,
@@ -114,31 +114,31 @@ function RecommendedAreaLayer({ zones }: { zones: RecommendedZone[] }) {
       {zones.map((z) => {
         const stroke = z.accentHex ?? "#ea580c";
         const fillSoft = z.accentHex ?? "#fb923c";
+        const positions = z.polygon.map(([la, lo]) => [la, lo] as [number, number]);
         return (
           <Fragment key={z.id}>
-            <Circle
-              center={[z.latitude, z.longitude]}
-              radius={z.radiusMeters * 1.45}
+            <Polygon
+              positions={positions}
               pathOptions={{
                 stroke: false,
                 fillColor: fillSoft,
-                fillOpacity: 0.09,
+                fillOpacity: 0.06,
                 interactive: false,
               }}
             />
-            <Circle
-              center={[z.latitude, z.longitude]}
-              radius={z.radiusMeters}
+            <Polygon
+              positions={positions}
               pathOptions={{
                 color: stroke,
                 fillColor: fillSoft,
-                fillOpacity: 0.16,
+                fillOpacity: 0.1,
                 weight: 2,
-                dashArray: "10 7",
+                lineJoin: "round",
+                lineCap: "round",
                 className: "recommended-zone-pulse",
               }}
             >
-              <Tooltip direction="top" offset={[0, -6]} opacity={0.92}>
+              <Tooltip direction="top" offset={[0, -4]} opacity={0.95}>
                 <span className="text-xs font-semibold text-gray-900">
                   {z.label}
                 </span>
@@ -146,7 +146,7 @@ function RecommendedAreaLayer({ zones }: { zones: RecommendedZone[] }) {
                   おすすめエリア
                 </span>
               </Tooltip>
-            </Circle>
+            </Polygon>
           </Fragment>
         );
       })}
@@ -172,7 +172,6 @@ export default function BarMap({
   selectedId: string | null;
   onSelect: (id: string) => void;
   className?: string;
-  /** 空配列でおすすめエリア非表示 */
   recommendedZones?: RecommendedZone[];
 }) {
   const [mapStyle, setMapStyle] = useState<MapTileStyle>("simple");
@@ -191,7 +190,7 @@ export default function BarMap({
             {mapStyle === "simple"
               ? "見やすいライト地図"
               : "道路・施設名が詳しい地図"}
-            {" · "}オレンジの丸＝おすすめゾーン
+            {" · "}色付きの形＝おすすめエリア（目安）
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

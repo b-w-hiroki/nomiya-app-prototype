@@ -1,10 +1,8 @@
 export interface RecommendedZone {
   id: string;
   label: string;
-  latitude: number;
-  longitude: number;
-  /** Leaflet Circle の半径（メートル） */
-  radiusMeters: number;
-  /** 枠・塗りの色（#RRGGBB） */
+  /** 緯度・経度の閉じたリング [[lat, lng], ...]（行政区画っぽく見せるためのおおまかな形） */
+  polygon: [number, number][];
+  /** 枠・塗りのアクセント色（#RRGGBB） */
   accentHex?: string;
 }

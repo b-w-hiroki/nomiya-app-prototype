@@ -6,7 +6,17 @@ import BarCard from "@/components/BarCard";
 import { BAR_SPOTS } from "@/lib/barMock";
 import { DRINK_FILTER_OPTIONS } from "@/lib/barDrinks";
 import { BarPriceRange, BarVibe } from "@/types/bar";
-import { Beer, MapPin, SlidersHorizontal, Wine, X } from "lucide-react";
+import {
+  Beer,
+  LayoutGrid,
+  MapIcon,
+  MapPin,
+  SlidersHorizontal,
+  Wine,
+  X,
+} from "lucide-react";
+
+type BrowseMode = "map" | "list";
 
 /** モバイルは画面比・デスクトップはビューポート基準で地図を広く */
 const MAP_SHELL =
@@ -28,7 +38,15 @@ type Filter = "all" | "yes" | "no";
 const selectClass =
   "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 shadow-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/25";
 
+const segBtn = (on: boolean) =>
+  `inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition ${
+    on
+      ? "bg-white text-gray-900 shadow-sm"
+      : "text-gray-600 hover:bg-white/60 hover:text-gray-900"
+  }`;
+
 export default function BarModePage() {
+  const [browseMode, setBrowseMode] = useState<BrowseMode>("map");
   const [price, setPrice] = useState<BarPriceRange | "all">("all");
   const [vibe, setVibe] = useState<BarVibe | "all">("all");
   const [beginner, setBeginner] = useState<Filter>("all");
@@ -84,10 +102,11 @@ export default function BarModePage() {
               Barモード
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-600">
-              地図左上で<strong className="font-semibold text-gray-800">シンプル／詳細</strong>
-              を切り替えられます。オレンジの点線サークルは
+              <strong className="font-semibold text-gray-800">マップ</strong>
+              か<strong className="font-semibold text-gray-800">一覧</strong>
+              で見る方式を切り替えられます。地図上の色付きゾーンは
               <strong className="font-semibold text-gray-800">おすすめエリア</strong>
-              （モック）です。ピンや店名チップで右のパネルに詳細が出ます。
+              の目安（多角形・モック）です。
             </p>
           </div>
         </div>
@@ -156,7 +175,7 @@ export default function BarModePage() {
           <p className="mt-2 text-xs leading-relaxed text-gray-600">
             {drinkKey === "all" ? (
               <>
-                例：「サッポロビール」を選ぶと、その取扱がある店だけが地図に残ります（モックデータ）。
+                例：「サッポロビール」を選ぶと、その取扱がある店だけが表示されます（モック）。
               </>
             ) : (
               <>
@@ -168,91 +187,148 @@ export default function BarModePage() {
         </div>
       </section>
 
-      <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_min(400px,36%)] lg:items-stretch lg:gap-6">
-        <div className="flex min-h-0 flex-col gap-3 lg:sticky lg:top-[5.25rem] lg:self-start">
-          <div className={`${MAP_SHELL} overflow-hidden rounded-2xl`}>
-            <BarMap
-              bars={filtered}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              className="h-full w-full"
-            />
-          </div>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200/90 bg-white px-4 py-3 shadow-sm">
+        <p className="text-sm text-gray-600">
+          表示方法 · 該当{" "}
+          <span className="font-semibold text-gray-900">{filtered.length}</span>{" "}
+          件
+        </p>
+        <div
+          className="flex rounded-xl border border-gray-200 bg-gray-100/90 p-0.5"
+          role="group"
+          aria-label="表示切替"
+        >
+          <button
+            type="button"
+            className={segBtn(browseMode === "map")}
+            onClick={() => setBrowseMode("map")}
+            aria-pressed={browseMode === "map"}
+          >
+            <MapIcon className="h-4 w-4" aria-hidden />
+            マップ
+          </button>
+          <button
+            type="button"
+            className={segBtn(browseMode === "list")}
+            onClick={() => setBrowseMode("list")}
+            aria-pressed={browseMode === "list"}
+          >
+            <LayoutGrid className="h-4 w-4" aria-hidden />
+            一覧
+          </button>
+        </div>
+      </div>
 
-          {filtered.length > 0 && (
-            <div>
-              <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-gray-500">
-                店名から開く（{filtered.length}件）
-              </p>
-              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
-                {filtered.map((bar) => (
-                  <button
-                    key={bar.id}
-                    type="button"
-                    onClick={() => setSelectedId(bar.id)}
-                    className={chipClass(selectedId === bar.id)}
-                    aria-pressed={selectedId === bar.id}
-                  >
-                    {bar.name}
-                  </button>
-                ))}
-              </div>
+      {browseMode === "list" ? (
+        <section>
+          {filtered.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50/80 px-5 py-12 text-center text-sm text-gray-500">
+              条件に一致するBarがありません。
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {filtered.map((bar) => (
+                <BarCard
+                  key={bar.id}
+                  bar={bar}
+                  selected={selectedId === bar.id}
+                  highlightDrink={drinkKey === "all" ? null : drinkKey}
+                  onSelect={() =>
+                    setSelectedId((id) => (id === bar.id ? null : bar.id))
+                  }
+                />
+              ))}
             </div>
           )}
-        </div>
-
-        <aside className="flex min-h-[280px] flex-col overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-md ring-1 ring-black/[0.04] lg:min-h-[min(78vh,calc(100vh-10.5rem))]">
-          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-gray-100 bg-stone-50/80 px-4 py-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-              <MapPin className="h-4 w-4 text-accent" aria-hidden />
-              詳細
+        </section>
+      ) : (
+        <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_min(400px,36%)] lg:items-stretch lg:gap-6">
+          <div className="flex min-h-0 flex-col gap-3 lg:sticky lg:top-[5.25rem] lg:self-start">
+            <div className={`${MAP_SHELL} overflow-hidden rounded-2xl`}>
+              <BarMap
+                bars={filtered}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                className="h-full w-full"
+              />
             </div>
-            {selectedBar ? (
-              <button
-                type="button"
-                onClick={() => setSelectedId(null)}
-                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-gray-600 transition hover:bg-gray-200/60 hover:text-gray-900"
-              >
-                <X className="h-3.5 w-3.5" aria-hidden />
-                閉じる
-              </button>
-            ) : (
-              <span className="text-xs text-gray-400">未選択</span>
+
+            {filtered.length > 0 && (
+              <div>
+                <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-gray-500">
+                  店名から開く（{filtered.length}件）
+                </p>
+                <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
+                  {filtered.map((bar) => (
+                    <button
+                      key={bar.id}
+                      type="button"
+                      onClick={() => setSelectedId(bar.id)}
+                      className={chipClass(selectedId === bar.id)}
+                      aria-pressed={selectedId === bar.id}
+                    >
+                      {bar.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
-            {filtered.length === 0 ? (
-              <div className="px-5 py-12 text-center text-sm text-gray-500">
-                条件に一致するBarがありません。フィルタを緩めて試してください。
+          <aside className="flex min-h-[280px] flex-col overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-md ring-1 ring-black/[0.04] lg:min-h-[min(78vh,calc(100vh-10.5rem))]">
+            <div className="flex shrink-0 items-center justify-between gap-2 border-b border-gray-100 bg-stone-50/80 px-4 py-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <MapPin className="h-4 w-4 text-accent" aria-hidden />
+                詳細
               </div>
-            ) : selectedBar ? (
-              <div className="p-3 sm:p-4">
-                <BarCard
-                  bar={selectedBar}
-                  selected
-                  embedded
-                  highlightDrink={drinkKey === "all" ? null : drinkKey}
-                />
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center gap-3 px-6 py-14 text-center">
-                <div className="rounded-full bg-gray-100 p-4">
-                  <MapPin className="h-8 w-8 text-gray-400" aria-hidden />
+              {selectedBar ? (
+                <button
+                  type="button"
+                  onClick={() => setSelectedId(null)}
+                  className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-gray-600 transition hover:bg-gray-200/60 hover:text-gray-900"
+                >
+                  <X className="h-3.5 w-3.5" aria-hidden />
+                  閉じる
+                </button>
+              ) : (
+                <span className="text-xs text-gray-400">未選択</span>
+              )}
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
+              {filtered.length === 0 ? (
+                <div className="px-5 py-12 text-center text-sm text-gray-500">
+                  条件に一致するBarがありません。
                 </div>
-                <p className="max-w-xs text-sm leading-relaxed text-gray-600">
-                  <strong className="text-gray-800">地図のオレンジのピン</strong>
-                  をタップするか、上の<strong className="text-gray-800">店名チップ</strong>
-                  から選ぶと、ここに写真やメモが表示されます。
-                </p>
-                <p className="text-xs text-gray-400">
-                  該当 {filtered.length} 件
-                </p>
-              </div>
-            )}
-          </div>
-        </aside>
-      </div>
+              ) : selectedBar ? (
+                <div className="p-3 sm:p-4">
+                  <BarCard
+                    bar={selectedBar}
+                    selected
+                    embedded
+                    highlightDrink={drinkKey === "all" ? null : drinkKey}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-3 px-6 py-14 text-center">
+                  <div className="rounded-full bg-gray-100 p-4">
+                    <MapPin className="h-8 w-8 text-gray-400" aria-hidden />
+                  </div>
+                  <p className="max-w-xs text-sm leading-relaxed text-gray-600">
+                    <strong className="text-gray-800">ピンをタップ</strong>
+                    するか
+                    <strong className="text-gray-800">店名チップ</strong>
+                    から選ぶと、ここに詳細が出ます。
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    該当 {filtered.length} 件
+                  </p>
+                </div>
+              )}
+            </div>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }

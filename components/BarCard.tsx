@@ -23,12 +23,15 @@ export default function BarCard({
   selected,
   onSelect,
   highlightDrink,
+  embedded,
 }: {
   bar: BarSpot;
   selected?: boolean;
   onSelect?: () => void;
   /** 逆引きフィルタで選んだドリンクをチップで強調 */
   highlightDrink?: string | null;
+  /** サイドパネル内表示用（枠やリングを弱める） */
+  embedded?: boolean;
 }) {
   const photos = useMemo(
     () => [bar.coverImageUrl, ...(bar.atmospherePhotos ?? [])],
@@ -55,10 +58,12 @@ export default function BarCard({
           onSelect();
         }
       }}
-      className={`overflow-hidden rounded-xl border bg-white shadow-sm transition-all duration-200 ${
-        selected
-          ? "border-accent ring-2 ring-accent/35 shadow-md"
-          : "border-gray-200/90 hover:border-gray-300 hover:shadow-md"
+      className={`overflow-hidden rounded-xl border bg-white transition-all duration-200 ${
+        embedded
+          ? "border-transparent shadow-none"
+          : selected
+            ? "border-accent shadow-md ring-2 ring-accent/35"
+            : "border-gray-200/90 shadow-sm hover:border-gray-300 hover:shadow-md"
       } ${onSelect ? "cursor-pointer" : ""}`}
     >
       <div className="relative aspect-[16/9] w-full bg-gray-100">

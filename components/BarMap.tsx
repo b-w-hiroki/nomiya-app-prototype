@@ -83,7 +83,7 @@ export default function BarMap({
             エリア
           </p>
           <p className="text-[11px] leading-snug text-gray-500">
-            やわらかい地図表示 · ピンで店を選択
+            シンプル地図 · ピンタップで詳細へ
           </p>
         </div>
         <span className="rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-gray-600 shadow-sm ring-1 ring-gray-100">

@@ -6,9 +6,12 @@ import BarCard from "@/components/BarCard";
 import { BAR_SPOTS } from "@/lib/barMock";
 import { DRINK_FILTER_OPTIONS } from "@/lib/barDrinks";
 import { BarPriceRange, BarVibe } from "@/types/bar";
+import { haversineMeters } from "@/utils/geo";
 import {
   Beer,
   LayoutGrid,
+  LocateFixed,
+  Loader2,
   MapIcon,
   MapPin,
   SlidersHorizontal,
@@ -17,6 +20,7 @@ import {
 } from "lucide-react";
 
 type BrowseMode = "map" | "list";
+type GeoState = "idle" | "loading" | "success" | "error";
 
 /** モバイルは画面比・デスクトップはビューポート基準で地図を広く */
 const MAP_SHELL =
@@ -52,6 +56,9 @@ export default function BarModePage() {
   const [beginner, setBeginner] = useState<Filter>("all");
   const [drinkKey, setDrinkKey] = useState<string>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoState, setGeoState] = useState<GeoState>("idle");
+  const [geoError, setGeoError] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     return BAR_SPOTS.filter((bar) => {
@@ -73,9 +80,28 @@ export default function BarModePage() {
     }
   }, [filtered, selectedId]);
 
+  const barsWithDistance = useMemo(
+    () =>
+      filtered.map((bar) => ({
+        bar,
+        distanceMeters: userLocation
+          ? haversineMeters(
+              { lat: userLocation.lat, lng: userLocation.lng },
+              { lat: bar.latitude, lng: bar.longitude }
+            )
+          : null,
+      })),
+    [filtered, userLocation]
+  );
+
+  const visibleBars = useMemo(() => {
+    if (!userLocation) return barsWithDistance;
+    return [...barsWithDistance].sort((a, b) => (a.distanceMeters ?? 0) - (b.distanceMeters ?? 0));
+  }, [barsWithDistance, userLocation]);
+
   const selectedBar = useMemo(
-    () => filtered.find((b) => b.id === selectedId) ?? null,
-    [filtered, selectedId]
+    () => visibleBars.find((v) => v.bar.id === selectedId) ?? null,
+    [visibleBars, selectedId]
   );
 
   const drinkHint = DRINK_FILTER_OPTIONS.find((o) => o.value === drinkKey);
@@ -86,6 +112,34 @@ export default function BarModePage() {
         ? "border-accent bg-orange-50 text-orange-900 shadow-sm"
         : "border-gray-200 bg-white text-gray-700 hover:border-accent/40 hover:bg-orange-50/50"
     }`;
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      setGeoState("error");
+      setGeoError("このブラウザでは位置情報を利用できません。");
+      return;
+    }
+    setGeoState("loading");
+    setGeoError(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+        setGeoState("success");
+      },
+      () => {
+        setGeoState("error");
+        setGeoError("位置情報の取得に失敗しました（許可設定をご確認ください）。");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000,
+      }
+    );
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 pb-12">
@@ -188,49 +242,66 @@ export default function BarModePage() {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200/90 bg-white px-4 py-3 shadow-sm">
         <p className="text-sm text-gray-600">
           表示方法 · 該当{" "}
-          <span className="font-semibold text-gray-900">{filtered.length}</span>{" "}
+          <span className="font-semibold text-gray-900">{visibleBars.length}</span>{" "}
           件
         </p>
-        <div
-          className="flex rounded-xl border border-gray-200 bg-gray-100/90 p-0.5"
-          role="group"
-          aria-label="表示切替"
-        >
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            className={segBtn(browseMode === "map")}
-            onClick={() => setBrowseMode("map")}
-            aria-pressed={browseMode === "map"}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-accent/40 hover:bg-orange-50/50"
+            onClick={handleUseMyLocation}
+            disabled={geoState === "loading"}
           >
-            <MapIcon className="h-4 w-4" aria-hidden />
-            マップ
+            {geoState === "loading" ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <LocateFixed className="h-4 w-4" aria-hidden />
+            )}
+            現在地を使う
           </button>
-          <button
-            type="button"
-            className={segBtn(browseMode === "list")}
-            onClick={() => setBrowseMode("list")}
-            aria-pressed={browseMode === "list"}
+          <div
+            className="flex rounded-xl border border-gray-200 bg-gray-100/90 p-0.5"
+            role="group"
+            aria-label="表示切替"
           >
-            <LayoutGrid className="h-4 w-4" aria-hidden />
-            一覧
-          </button>
+            <button
+              type="button"
+              className={segBtn(browseMode === "map")}
+              onClick={() => setBrowseMode("map")}
+              aria-pressed={browseMode === "map"}
+            >
+              <MapIcon className="h-4 w-4" aria-hidden />
+              マップ
+            </button>
+            <button
+              type="button"
+              className={segBtn(browseMode === "list")}
+              onClick={() => setBrowseMode("list")}
+              aria-pressed={browseMode === "list"}
+            >
+              <LayoutGrid className="h-4 w-4" aria-hidden />
+              一覧
+            </button>
+          </div>
         </div>
       </div>
+      {geoError && <p className="mb-4 text-sm text-red-600">{geoError}</p>}
 
       {browseMode === "list" ? (
         <section>
-          {filtered.length === 0 ? (
+          {visibleBars.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50/80 px-5 py-12 text-center text-sm text-gray-500">
               条件に一致するBarがありません。
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {filtered.map((bar) => (
+              {visibleBars.map(({ bar, distanceMeters }) => (
                 <BarCard
                   key={bar.id}
                   bar={bar}
                   selected={selectedId === bar.id}
                   highlightDrink={drinkKey === "all" ? null : drinkKey}
+                  distanceMeters={distanceMeters}
                   onSelect={() =>
                     setSelectedId((id) => (id === bar.id ? null : bar.id))
                   }
@@ -247,17 +318,18 @@ export default function BarModePage() {
                 bars={filtered}
                 selectedId={selectedId}
                 onSelect={setSelectedId}
+                userLocation={userLocation}
                 className="h-full w-full"
               />
             </div>
 
-            {filtered.length > 0 && (
+            {visibleBars.length > 0 && (
               <div>
                 <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-gray-500">
-                  店名から開く（{filtered.length}件）
+                  店名から開く（{visibleBars.length}件）
                 </p>
                 <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
-                  {filtered.map((bar) => (
+                  {visibleBars.map(({ bar }) => (
                     <button
                       key={bar.id}
                       type="button"
@@ -294,17 +366,18 @@ export default function BarModePage() {
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
-              {filtered.length === 0 ? (
+              {visibleBars.length === 0 ? (
                 <div className="px-5 py-12 text-center text-sm text-gray-500">
                   条件に一致するBarがありません。
                 </div>
               ) : selectedBar ? (
                 <div className="p-3 sm:p-4">
                   <BarCard
-                    bar={selectedBar}
+                    bar={selectedBar.bar}
                     selected
                     embedded
                     highlightDrink={drinkKey === "all" ? null : drinkKey}
+                    distanceMeters={selectedBar.distanceMeters}
                   />
                 </div>
               ) : (
@@ -319,7 +392,7 @@ export default function BarModePage() {
                     から選ぶと、ここに詳細が出ます。
                   </p>
                   <p className="text-xs text-gray-400">
-                    該当 {filtered.length} 件
+                    該当 {visibleBars.length} 件
                   </p>
                 </div>
               )}

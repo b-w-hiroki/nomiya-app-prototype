@@ -2,7 +2,7 @@
 
 import { BarSpot } from "@/types/bar";
 import { drinkLabel } from "@/lib/barDrinks";
-import { Clock, MapPin, Train } from "lucide-react";
+import { Clock, MapPin, Navigation, Train } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
@@ -24,6 +24,7 @@ export default function BarCard({
   onSelect,
   highlightDrink,
   embedded,
+  distanceMeters,
 }: {
   bar: BarSpot;
   selected?: boolean;
@@ -32,6 +33,7 @@ export default function BarCard({
   highlightDrink?: string | null;
   /** サイドパネル内表示用（枠やリングを弱める） */
   embedded?: boolean;
+  distanceMeters?: number | null;
 }) {
   const photos = useMemo(
     () => [bar.coverImageUrl, ...(bar.atmospherePhotos ?? [])],
@@ -133,6 +135,15 @@ export default function BarCard({
                 <Train className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden />
                 {bar.nearestStation} 徒歩{bar.walkMinutes}分
               </span>
+              {typeof distanceMeters === "number" && (
+                <>
+                  <span className="text-gray-300">·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Navigation className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden />
+                    現在地から{(distanceMeters / 1000).toFixed(1)}km
+                  </span>
+                </>
+              )}
             </p>
           </div>
         </div>

@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import { BarSpot } from "@/types/bar";
 
 const YOKOHAMA_ST: [number, number] = [35.465995, 139.622093];
+type LatLng = { lat: number; lng: number };
 
 type MapTileStyle = "simple" | "detailed";
 
@@ -87,6 +88,19 @@ function FlyToSelected({
   return null;
 }
 
+function FlyToUserLocation({
+  userLocation,
+}: {
+  userLocation: LatLng | null;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    if (!userLocation) return;
+    map.flyTo([userLocation.lat, userLocation.lng], 14, { duration: 0.5 });
+  }, [map, userLocation]);
+  return null;
+}
+
 function pinIcon(selected: boolean) {
   const fill = selected ? "#ea580c" : "#fb923c";
   return L.divIcon({
@@ -96,6 +110,13 @@ function pinIcon(selected: boolean) {
     iconAnchor: [13, 13],
   });
 }
+
+const userIcon = L.divIcon({
+  className: "bar-map-pin",
+  html: '<div style="width:20px;height:20px;border-radius:9999px;border:3px solid #fff;box-shadow:0 2px 8px rgba(37,99,235,.35);background:#2563eb;box-sizing:border-box"></div>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
 
 const segmentBtn = (active: boolean) =>
   `rounded-md px-2.5 py-1 transition ${
@@ -108,11 +129,13 @@ export default function BarMap({
   bars,
   selectedId,
   onSelect,
+  userLocation,
   className = "",
 }: {
   bars: BarSpot[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  userLocation?: LatLng | null;
   className?: string;
 }) {
   const [mapStyle, setMapStyle] = useState<MapTileStyle>("simple");
@@ -185,6 +208,14 @@ export default function BarMap({
             bars={bars}
             flyZoom={tile.flyZoom}
           />
+          <FlyToUserLocation userLocation={userLocation ?? null} />
+          {userLocation && (
+            <Marker
+              key={`user-${userLocation.lat}-${userLocation.lng}`}
+              position={[userLocation.lat, userLocation.lng]}
+              icon={userIcon}
+            />
+          )}
           {bars.map((bar) => (
             <Marker
               key={`${bar.id}-${selectedId === bar.id}`}

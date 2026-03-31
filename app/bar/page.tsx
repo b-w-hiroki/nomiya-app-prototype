@@ -104,9 +104,7 @@ export default function BarModePage() {
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-600">
               <strong className="font-semibold text-gray-800">マップ</strong>
               か<strong className="font-semibold text-gray-800">一覧</strong>
-              で見る方式を切り替えられます。地図上の色付きゾーンは
-              <strong className="font-semibold text-gray-800">おすすめエリア</strong>
-              の目安（うっすら塗り・枠なし／モック）です。
+              で見る方式を切り替えられます。ピンが店の位置です。
             </p>
           </div>
         </div>

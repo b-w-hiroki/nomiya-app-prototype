@@ -1,20 +1,10 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Polygon,
-  LayerGroup,
-  Tooltip,
-  useMap,
-} from "react-leaflet";
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { BarSpot } from "@/types/bar";
-import { RecommendedZone } from "@/types/recommendedZone";
-import { RECOMMENDED_ZONES } from "@/lib/recommendedZones";
 
 const YOKOHAMA_ST: [number, number] = [35.465995, 139.622093];
 
@@ -107,40 +97,6 @@ function pinIcon(selected: boolean) {
   });
 }
 
-function RecommendedAreaLayer({ zones }: { zones: RecommendedZone[] }) {
-  if (zones.length === 0) return null;
-  return (
-    <LayerGroup>
-      {zones.map((z) => {
-        const fillSoft = z.accentHex ?? "#fb923c";
-        const positions = z.polygon.map(([la, lo]) => [la, lo] as [number, number]);
-        return (
-          <Fragment key={z.id}>
-            <Polygon
-              positions={positions}
-              pathOptions={{
-                stroke: false,
-                fillColor: fillSoft,
-                fillOpacity: 0.09,
-                className: "recommended-zone-fill",
-              }}
-            >
-              <Tooltip direction="top" offset={[0, -4]} opacity={0.95}>
-                <span className="text-xs font-semibold text-gray-900">
-                  {z.label}
-                </span>
-                <span className="mt-0.5 block text-[11px] font-normal text-gray-600">
-                  おすすめエリア
-                </span>
-              </Tooltip>
-            </Polygon>
-          </Fragment>
-        );
-      })}
-    </LayerGroup>
-  );
-}
-
 const segmentBtn = (active: boolean) =>
   `rounded-md px-2.5 py-1 transition ${
     active
@@ -153,13 +109,11 @@ export default function BarMap({
   selectedId,
   onSelect,
   className = "",
-  recommendedZones = RECOMMENDED_ZONES,
 }: {
   bars: BarSpot[];
   selectedId: string | null;
   onSelect: (id: string) => void;
   className?: string;
-  recommendedZones?: RecommendedZone[];
 }) {
   const [mapStyle, setMapStyle] = useState<MapTileStyle>("simple");
   const tile = TILE[mapStyle];
@@ -177,7 +131,6 @@ export default function BarMap({
             {mapStyle === "simple"
               ? "見やすいライト地図"
               : "道路・施設名が詳しい地図"}
-            {" · "}色の塗り＝おすすめエリア（目安・枠なし）
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -222,7 +175,6 @@ export default function BarMap({
             subdomains={tile.subdomains}
           />
           <SyncMapMaxZoom maxZoom={tile.maxZoom} />
-          <RecommendedAreaLayer zones={recommendedZones} />
           <FitBounds
             bars={bars}
             fitMaxZoom={tile.fitMaxZoom}

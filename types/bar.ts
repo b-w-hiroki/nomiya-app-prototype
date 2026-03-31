@@ -14,6 +14,10 @@ export interface BarSpot {
   noCoverCharge: boolean;
   openUntil: string;
   note: string;
+  /** 一覧・地図カードのメイン写真（雰囲気紹介） */
+  coverImageUrl: string;
+  /** 追加の雰囲気ショット（任意） */
+  atmospherePhotos?: string[];
   latitude: number;
   longitude: number;
 }

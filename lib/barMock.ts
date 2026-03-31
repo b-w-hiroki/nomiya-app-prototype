@@ -1,6 +1,9 @@
 import { BarSpot } from "@/types/bar";
 
-/** 横浜駅周辺を想定したモック座標 */
+const u = (id: string, w = 800, h = 560) =>
+  `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&q=80`;
+
+/** 横浜駅周辺を想定したモック座標・写真（Unsplash／雰囲気イメージ） */
 export const BAR_SPOTS: BarSpot[] = [
   {
     id: "b1",
@@ -15,6 +18,11 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: false,
     openUntil: "02:00",
     note: "カウンター中心で初来店が多い。会話もほどよい。",
+    coverImageUrl: u("photo-1514933651103-005eec06c04b"),
+    atmospherePhotos: [
+      u("photo-1572116469696-31de0f17cc34", 640, 420),
+      u("photo-1544145945-f90425340c7e", 640, 420),
+    ],
     latitude: 35.4672,
     longitude: 139.6175,
   },
@@ -31,6 +39,8 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: true,
     openUntil: "01:00",
     note: "静かに飲みたい方向け。ウイスキーが豊富。",
+    coverImageUrl: u("photo-1470337458703-46ad1756a187"),
+    atmospherePhotos: [u("photo-1525268771113-32d9e9141fcd", 640, 420)],
     latitude: 35.4648,
     longitude: 139.628,
   },
@@ -47,6 +57,11 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: true,
     openUntil: "03:00",
     note: "立ち寄りやすい雰囲気。にぎやかめ。",
+    coverImageUrl: u("photo-1558642452-9d2a7deb7f62"),
+    atmospherePhotos: [
+      u("photo-1514362540857-3e02c0fb4c36", 640, 420),
+      u("photo-1575444758702-4a6b9cd03aeb", 640, 420),
+    ],
     latitude: 35.4645,
     longitude: 139.619,
   },
@@ -63,6 +78,8 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: true,
     openUntil: "24:00",
     note: "1人客比率が高く、スタッフが丁寧。",
+    coverImageUrl: u("photo-1517248135467-4c7edcad34c4"),
+    atmospherePhotos: [u("photo-1559329007-40df8a9345d8", 640, 420)],
     latitude: 35.4505,
     longitude: 139.6295,
   },
@@ -79,6 +96,11 @@ export const BAR_SPOTS: BarSpot[] = [
     noCoverCharge: false,
     openUntil: "01:30",
     note: "落ち着いた接客。デート利用も多い。",
+    coverImageUrl: u("photo-1566417713940-fe7c737a9ef2"),
+    atmospherePhotos: [
+      u("photo-1507003211169-0a1dd7228f2d", 640, 420),
+      u("photo-1551024506-0bccd828d307", 640, 420),
+    ],
     latitude: 35.4428,
     longitude: 139.637,
   },

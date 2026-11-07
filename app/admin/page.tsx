@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { CampaignInsert } from "@/types/campaign";
 import { STATIONS } from "@/lib/stations";
-import { supabase } from "@/utils/supabase";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -23,24 +22,27 @@ export default function AdminPage() {
     source: "手入力",
     tags: [],
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewReady, setPreviewReady] = useState(false);
   const [previewImage, setPreviewImage] = useState<string>("");
   const [stationId, setStationId] = useState<string>("yokohama");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    setPreviewReady(false);
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPreviewReady(false);
     const url = e.target.value;
     setFormData((prev) => ({ ...prev, image_url: url }));
     setPreviewImage(url);
   };
 
   const handleStationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setPreviewReady(false);
     const id = e.target.value;
     setStationId(id);
     const s = STATIONS.find((x) => x.id === id);
@@ -54,47 +56,32 @@ export default function AdminPage() {
     }
   };
 
-  const hasSupabaseEnv =
-    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
-    Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  // This prototype has no administrator authentication. Never send form data
+  // to Supabase merely because public connection variables are configured.
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      // TODO: Supabaseへの保存処理を実装
-      // const { data, error } = await supabase
-      //   .from("coupons")
-      //   .insert([formData])
-      //   .select();
-
-      if (hasSupabaseEnv) {
-        const payload = {
-          ...formData,
-          starts_at: formData.starts_at || null,
-          image_url: formData.image_url || null,
-          brand: formData.brand || null,
-        };
-        const { error } = await supabase.from("campaigns").insert([payload]);
-        if (error) throw error;
-        alert("キャンペーンを投稿しました！");
-      } else {
-        console.log("送信データ(モック保存):", formData);
-        alert("環境変数未設定のため、モックとして投稿完了にしました。");
-      }
-      router.push("/");
-    } catch (error) {
-      console.error("エラー:", error);
-      alert("投稿に失敗しました。");
-    } finally {
-      setIsSubmitting(false);
-    }
+    setPreviewReady(true);
   };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">キャンペーン投稿</h1>
+      <header className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
+        <p className="text-xs font-semibold tracking-wide text-amber-800">入力プレビュー・保存なし</p>
+        <h1 className="mt-2 text-2xl font-bold text-gray-900">キャンペーンを下書き</h1>
+        <p className="mt-2 text-sm leading-relaxed text-gray-700">
+          管理者認証が未実装のため、この画面から投稿・保存はできません。
+          入力内容はページを離れると失われます。画像URLのプレビューは外部サイトから読み込みます。
+        </p>
+      </header>
+      {previewReady && (
+        <section role="status" className="mb-6 rounded-xl border border-gray-200 bg-white p-5">
+          <p className="text-sm font-semibold text-gray-700">入力を確認しました（未保存）</p>
+          <p className="mt-2 font-bold text-gray-900">{formData.store_name}</p>
+          <p className="mt-1 text-gray-700">{formData.title}</p>
+          <p className="mt-1 font-semibold text-gray-900">{formData.price_display}</p>
+          <p className="mt-2 text-xs text-gray-600">公開・データベース保存は行っていません。</p>
+        </section>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 駅プリセット */}
@@ -325,10 +312,9 @@ export default function AdminPage() {
         <div className="flex gap-4">
           <button
             type="submit"
-            disabled={isSubmitting}
             className="flex-1 bg-accent hover:bg-accent-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? "投稿中..." : "キャンペーンを投稿"}
+            入力内容を確認
           </button>
           <button
             type="button"

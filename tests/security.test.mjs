@@ -17,3 +17,11 @@ test('schema remains read-only and documentation does not install permissive ins
   assert.doesNotMatch(fencedSql, /create\s+policy|with\s+check\s*\(true\)/i);
   assert.match(read('README.md'), /この変更だけで既存DBの権限は変わりません/);
 });
+test('image removal clears confirmation and controls have accessible names', () => {
+  const page = read('app/admin/page.tsx');
+  assert.match(page, /aria-label="画像プレビューを削除"\s+onClick=\{\(\) => \{\s+setPreviewReady\(false\);\s+setPreviewImage\(""\);/);
+  for (const id of ['station', 'latitude', 'longitude']) {
+    assert.match(page, new RegExp(`htmlFor="${id}"`));
+    assert.match(page, new RegExp(`id="${id}"`));
+  }
+});

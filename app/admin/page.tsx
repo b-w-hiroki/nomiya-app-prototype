@@ -86,10 +86,11 @@ export default function AdminPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 駅プリセット */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="station" className="block text-sm font-medium text-gray-700 mb-2">
             基準駅（座標を自動入力）
           </label>
           <select
+            id="station"
             value={stationId}
             onChange={handleStationChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
@@ -105,12 +106,13 @@ export default function AdminPage() {
         {/* 緯度経度 */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="latitude" className="block text-sm font-medium text-gray-700 mb-2">
               緯度 (latitude) <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
               step="0.000001"
+              id="latitude"
               name="latitude"
               value={formData.latitude}
               onChange={handleInputChange}
@@ -119,12 +121,13 @@ export default function AdminPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="longitude" className="block text-sm font-medium text-gray-700 mb-2">
               経度 (longitude) <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
               step="0.000001"
+              id="longitude"
               name="longitude"
               value={formData.longitude}
               onChange={handleInputChange}
@@ -240,7 +243,9 @@ export default function AdminPage() {
               />
               <button
                 type="button"
+                aria-label="画像プレビューを削除"
                 onClick={() => {
+                  setPreviewReady(false);
                   setPreviewImage("");
                   setFormData((prev) => ({ ...prev, image_url: "" }));
                 }}

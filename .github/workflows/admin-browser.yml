@@ -1,0 +1,32 @@
+name: Admin preview browser QA
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit
+      - run: npm run build:static
+      - run: npm install --no-save --package-lock=false --no-audit playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - name: Start isolated static server and test
+        run: |
+          python3 -m http.server 4393 --bind 127.0.0.1 --directory out > /tmp/admin-server.log 2>&1 &
+          for i in $(seq 1 20); do curl -sf http://127.0.0.1:4393/admin/ > /dev/null && break; sleep 1; done
+          node scripts/admin-browser-qa.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: admin-preview-screenshots
+          path: qa-artifacts/
+          if-no-files-found: ignore

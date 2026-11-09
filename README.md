@@ -34,7 +34,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 npm run dev
 ```
 
-ブラウザで [http://localhost:3000](http://localhost:3000) を開いて確認してください。
+ブラウザで [http://localhost:3003](http://localhost:3003) を開いて確認してください。
 
 ## プロジェクト構造
 
@@ -73,7 +73,7 @@ npm run dev
 
 ### 管理画面 (`/admin`)
 
-- クーポン投稿フォーム
+- 保存しない入力プレビュー（管理者認証・投稿機能は未実装）
 - 入力項目：
   - 店名
   - キャッチコピー
@@ -82,54 +82,55 @@ npm run dev
   - 有効期限
   - エリア
 
-## Supabaseデータベース設計
+## Supabaseと投稿権限
 
-### テーブル: `coupons`
+現在の参照先は `campaigns` テーブルです。正本の作成SQLは
+[`supabase/schema.sql`](supabase/schema.sql) を参照してください。
+RLSを有効にし、公開情報のSELECTだけを許可する読み取り専用の初期設定です。
+匿名・一般認証ユーザーのINSERT/UPDATE/DELETEを許可するポリシーは追加しません。
 
-| カラム名 | 型 | 説明 |
-|---------|-----|------|
-| id | uuid | プライマリキー |
-| created_at | timestamp | 作成日時 |
-| store_name | text | 店名 |
-| title | text | キャッチコピー |
-| price_display | text | 実質価格表示 |
-| image_url | text | 画像URL |
-| expires_at | timestamp with time zone | 有効期限 |
-| area | text | エリア（デフォルト: '横浜'） |
+`/admin` は入力プレビュー専用です。接続用環境変数が設定されていても
+DBへの書き込みやモックの「投稿成功」表示は行いません。
+これは認可の代わりではなく、未実装の機能を公開しないための制限です。
 
-### Supabaseテーブル作成SQL
+### 既存環境を使う前の点検
+
+旧READMEの `Admin can insert coupons ... WITH CHECK (true)` は
+管理者を限定しない不適切な例でした。`coupons` は旧例のテーブル名です。
+既存の本番にその設定が適用されたかは、このリポジトリからは確認できません。
+この変更だけで既存DBの権限は変わりません。
+
+管理者はSupabaseの管理画面で `campaigns` と旧 `coupons` のRLS・権限・
+INSERT/UPDATE/DELETEポリシーを確認してください。次のSQLは読み取り確認用です。
 
 ```sql
-CREATE TABLE coupons (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  store_name TEXT NOT NULL,
-  title TEXT NOT NULL,
-  price_display TEXT NOT NULL,
-  image_url TEXT NOT NULL,
-  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  area TEXT DEFAULT '横浜'
-);
-
--- RLS (Row Level Security) を有効化（必要に応じて）
-ALTER TABLE coupons ENABLE ROW LEVEL SECURITY;
-
--- 全ユーザーが読み取り可能（必要に応じて調整）
-CREATE POLICY "Anyone can read coupons" ON coupons
-  FOR SELECT USING (true);
-
--- 管理者のみ書き込み可能（認証が必要な場合は調整）
-CREATE POLICY "Admin can insert coupons" ON coupons
-  FOR INSERT WITH CHECK (true);
+select schemaname, tablename, policyname, roles, cmd, qual, with_check
+from pg_policies
+where schemaname = 'public' and tablename in ('campaigns', 'coupons');
 ```
 
-## 次のステップ
+既存ポリシーは本番への影響を確認してから個別に修正します。
+`schema.sql` を再実行しても既存の許可ポリシーを自動削除しません。
+service-roleキーはブラウザや `NEXT_PUBLIC_*` に配置しないでください。
 
-1. Supabaseプロジェクトを作成
-2. 上記のSQLでテーブルを作成
-3. `.env.local` に認証情報を設定
-4. `app/admin/page.tsx` のコメントアウト部分を有効化してSupabase連携を実装
-5. 画像アップロード機能を実装（Supabase Storage使用）
+### 投稿機能を実装する条件
+
+- 管理者認証とDB側の権限判定を先に設計する（画面の非表示だけに依存しない）。
+- 隔離環境で匿名・一般ユーザーの書き込み拒否と、管理者だけの許可を検証する。
+- 接続済み／モック／保存成功／保存失敗を明確に分ける。
+
+## 検証
+
+```bash
+npm ci
+npm test
+npm run type-check
+npm run lint
+npm run build:static
+```
+
+`npm test` は投稿停止とSQL例の回帰検査です。実DBの認可テストや
+本番設定確認の代わりにはなりません。
 
 ## ライセンス
 

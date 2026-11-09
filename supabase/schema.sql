@@ -20,7 +20,8 @@ create table if not exists public.campaigns (
 create index if not exists idx_campaigns_expires_at on public.campaigns (expires_at);
 create index if not exists idx_campaigns_lat_lng on public.campaigns (latitude, longitude);
 
--- RLS 設定（必要に応じて調整）
+-- RLS必須。初期設定は公開情報のSELECTのみ。
+-- 既存の書込みポリシーはこのファイルでは削除しないため、READMEの点検が必要。
 alter table public.campaigns enable row level security;
 
 -- 参照用（全体読み取り許可）

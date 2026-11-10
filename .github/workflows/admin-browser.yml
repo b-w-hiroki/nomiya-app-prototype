@@ -1,6 +1,8 @@
 name: Admin preview browser QA
 on:
   pull_request:
+  push:
+    branches: [main]
 permissions:
   contents: read
 jobs:
